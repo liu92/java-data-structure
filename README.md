@@ -577,3 +577,316 @@ p=p->next;//p指向下一结点
     return OK;  
   } //GetElem_L
  ```
+(5)、按值查找---根据指定数据获取该数据所在的位置(地址)
+   算法步骤
+    a.从第一个结点起,依次和e相比较。
+    b.如果找到一个其值与e相等的数据元素，则返回其在链表中 "位置" 或者 地址。
+    c.如果查遍整个链表都没有找到其值和e相等的元素,则返回 0 或者"NULL"。
+//按值查找 ，返回地址
+ ```
+  Lnode *LocateElem_L(LinkList L, ElemType e){
+     //在线性表L中查找值为e的数据元素
+     // 找到,则返回L中值为e的数据元素的地址,查找失败返回NULL
+     p = L->next;
+     // p不为空 并且 p->data和e不想等那么就继续查询
+     while(p && p->data!=e){
+      p=p->next; 
+     }
+     return p;  
+   } 
+  ``` 
+//按值查找 ，返回位置序号
+ ```
+ //在线性表L中查找值为e的数据元素的位置序号
+  int LocateElem_L(LinkList L,ElemType e){
+     // 返回L中值为e的数据元素的位置序号,查找失败返回0
+     p = L->next; j=1; //j记录位置
+     // 当前p值不为空 并且 p->data和e值不想等那么就继续查询
+     while(p && p->data!=e){
+      p=p->next;   
+      j++;
+     }
+     if(p){ 
+       return j;
+     }else{
+       return 0;  
+     }
+   } 
+  ``` 
+(6)、插入---在第i个结点签插入值为e的新节点 
+   a.首先找到i-1的存储位置p。
+   b.生成一个数据域为e的新结点s。
+   c.插入新结点： (1)新结点的指针域指向结点i
+                  (2)结点i-1的指针域指向新结点
+   ![image](image/image-20200511093138.png) 
+示例代码
+ ```
+ //在线性表L中第i个元素之前插入数据元素e
+  Status ListInsert_L(LinkList &L,int i,ElemType e){
+     // 返回L中值为e的数据元素的位置序号,查找失败返回0
+     p = L->next; j=0; //j记录位置
+     // 当前p值不为空 并且 p->data和e值不想等那么就继续查询
+     while(p && j<i-1){ // 寻找第i-1个结点，p指向i-1结点
+      p=p->next;   
+      ++j;
+     }
+     if(!p || j>i-1){ 
+       return ERROR; //i大于表长+1或者小于1,插入位置非法
+     }
+     s = new LNode; s->data=e; //生成新结点s,将结点s的数据域置为e
+     s->next = p->next;    // 将结点s插入L中,先将第i个结点放在新结点的后面 作为新结点的后继
+     p->next = s;          // 然后再把这个新结点 接到i-1这个结点的后面
+     return OK;
+   } 
+  ```    
+(7)、删除---删除第i个结点
+    算法步骤: 
+      a.首先找到i-1的存储位置p,保存要删除的i的值。
+      b.令p->next指向i+1。 
+      c.释放结点i的空间。
+  ![image](image/image-20200511100457.png)
+示例代码
+ ```
+ //将线性表L中第i个数据元素删除
+  Status ListDelete_L(LinkList &L,int i,ElemType &e){
+     p = L; j=0; q=i; //j记录位置
+     //从头往后进行查找 ，并且用计数器数着 是否到i-1个位置。如果不是那么再次循环
+     while(p->next && j<i-1){ // 寻找第i个结点，并令p指向前趋
+      p=p->next;   
+      ++j;
+     }
+     if(!(p->next) || j>i-1){ //当数据元素在1~n之间,如果查找到n之后,那么指针 p->next就为空了 
+       return ERROR; //不合理位置报错
+     }
+     q=p->next;           // 临时保存被删除结点的地址以备释放
+     p->next = q->next;   // 改变删除结点前趋结点的指针
+     e=q->data;           // 保存被删除结点的数据域
+     delete q;            //释放删除结点的空间
+     return OK;
+   } 
+  ```      
+(8)、单链表的查找、插入、删除的时间效率
+    a.查找
+      *因线性链表只能顺序存取,即在查找是要从头指针找起,查找的时间复杂度为O(n)
+    b.插入和删除
+      *因线性链表不需要移动元素,只要修改指针,一般情况下时间复杂度为O(1)
+      *但是,如果要在单链表中进行前插或删除操作,由于要从头查找前趋结点,所耗时间复杂度为O(n)
+      
+(9)、单链表的建立
+    1.头插法----元素插入在链表头部，也叫前插法
+      a.从一个空表开始,重复读入数据;
+      b.生成新结点,将读入数据存放到新结点的数据域中
+      c.从最后 一个结点开始,依次将各结点插入到链表的前端
+ 示例图;     
+ ![image](image/image-20200511104247.png)     
+ 
+ 2.在内存中申请一个地址，然查找到这个空间 然后将空间地址赋值给L
+  L = new LNode;// C++申请地址
+  L=(LinkList)malloc(sizeof(LNode));//c语言方式，使用malloc分配函数来分配一个结点这么大的空间
+ 示例图:
+ ![image](image/image-20200511105952.png)
+ 算法实现
+```
+ //倒位序输入元素
+  void CreateList_H(LinkList &L,int n){
+     L =new LNode;
+     L->next=NULL;//先建立一个带头结点的单链表 
+     for(i=n;i>0;--i){
+      p=new LNode; // 生成新结点p=(LNode*)malloc(sizeof(LNode));
+      cin>>p->data; //输入元素值 前面的是c++写法, 后面的 scanf(&p->data) 是c语言写法;  
+      p->next=L->next; //插入到表头
+      L->next = p;
+     }
+   } 
+算法时间复杂度是:O(n)
+  ```       
+ 
+
+(9.1)、尾插法------元素插入到链表尾部,也叫后插法
+   a.从一个空表L开始,将新结点逐个插入到链表的尾部，尾指针r执行链表的尾结点。
+   b.初始时,r同L均指向头结点 。没读入一个数据元素则申请一个新结点,将新结点插入到尾结点后,r指向新结点。
+ 算法实现
+```
+  //正未序输入n个元素的值，建立带表头结点的单链表L
+  void CreateList_H(LinkList &L,int n){
+     L =new LNode;
+     L->next=NULL;//先建立一个带头结点的单链表 
+     r=L; //尾指针r指向头结点
+     for(i=n;i>0;++i){
+      p=new LNode; // 生成新结点，输入元素,指针变量p指向这个空间
+                   // p=(LNode*)malloc(sizeof(LNode));
+      cin>>p->data; //输入元素值  前面的是c++写法, 后面的 scanf(&p->data) 是c语言写法;  
+      p->next=NULL;
+      r->next=p; //插入到表尾
+      r = p; //r指向新的尾结点
+     }
+   } //CreateList_R
+算法时间复杂度是:O(n)
+  ```
+4.4 线性表的链式表示和实现--循环链表
+  (1)、 循环链表:是一种头尾相接的链表(即:表中最后一个结点的指针域指向头结点,整个链表形成一个环)
+   优点:从表中任一结点出发均可找到表中其他结点   
+   
+   注意:由于循环链表中没有NULL指针,故涉及遍历操作时,其终止条件就不再像非循环链表那样判断
+   p或p->next是否为空,而是判断它们是否等于头指针。
+   
+   循环条件:
+```
+ p!=NULL                   p!=L (不等于头指针)
+ p->next!=NULL             p->next!=L
+ 单链表                    单循环链表
+```
+(2)、头指针表示   找a1的复杂度:O(1)
+单循环链表   找an的复杂度:O(n) 
+注意:表的操作常常是在表的首尾位置上进行
+
+(3)、尾指针表示   找a1的存储位置是: R->next->next    时间复杂度都是O(1)
+单循环链表   找an的存储位置是: R
+示意图:
+![image](image/image-20200511122701.png)
+
+(4)、合并两个单循环链表
+![image](image/image-20200511134359.png)
+```
+  LinkList Connect(LinkList Ta,LinkList Tb){
+     //假设Ta、Tb都是非空的单循环链表
+     p = Ta->next;            // p存表头结点
+     Ta->next=Tb->next->next; // Tb表头连结Ta表尾
+     delete Tb->next;         // 释放Tb表头结点 或free(Tb->next);
+     Tb->next=p;              // 修改指针
+     return Tb;
+   } //CreateList_R
+算法时间复杂度是:O(n)
+  ```
+
+4.5 线性表的链式表示和实现--双向链表
+ 单链表: 单链表的结点 -->有指示后继的指针域-->找后继结点方便； 
+       即:查找某结点的后继结点的执行时间为O(1).
+       无指示前驱的指针域--->找前驱结点难:要从表头出发开始查找
+       即:查找某结点的前驱结点的执行时间为O(n)
+ 双向链表:在单链表的每个结点里面再增加一个指向其直接前驱的指针域prior, 
+      这样链表中就形成了有两个方向不同的链表,故称为双向链表。(可以用双向链表来克服单链表查找前驱结点的缺点)    
+![image](image/image-20200511135501.png)
+
+(1)、双向链表的结构可定义如下
+```
+typedef struct DuLNode
+{
+    ElemType data;
+    struct DuLNode *prior *next; // 指针，它是指向一个同样式这个结点类型的一个指针，存放的是一个地址
+    //*LinkList 表示指向结构体Lnode的指针类型
+}DuLNode, *DuLinkList; // 重新定义了类型名，一个是这个结点的LNode,一个是指向这个结点的LinkList
+
+```
+![image](image/image-20200511140603.png)
+
+(3)、双向循环链表
+   和单链表的循环表类似，双向链表也可以有循环表
+   *让头结点的前驱指针指向链表的最后一个结点
+   *让最后一个结点的后继指针指向头结点
+  ![image](image/ image-20200511141047.png)
+  
+(4)、双向链表结构的对称性(设指针p指向某一结点)
+   p->prior->next = p = p-> next ->prior
+  在双向链表中有些操作(如:ListLength, GetElem等),因仅涉及一个方向的指针,
+  故它们的算法与线性链表的相同。但在插入、删除时,则需要同时修改两个方向上的指针,
+  两者的操作的时间复杂度为O(n) 
+  ![image](image/image-20200511141826.png)
+  
+  
+(5)、双向链表的插入 
+插入示意图:
+ ![image](image/image-20200511143045.png)
+ 
+算法实现:
+```
+  //头结点的指针 &L, 插入一个元素后仍然用这个返回，所以前面带了连字符& 引用型变量
+  void ListInsert_DuL(DuLinkList &L,int i, ElemType e){
+     //在带头结点的双向循环链表L中第i个位置之前插入元素e
+     //在链表L上找到第i个，找到结果后赋值个p,让p指向第i个结点
+     //如果位置是不合理的 那么就返回错误。
+    if(!(p=GetElemP_Dul(L,i))) return RRROR;
+     s=new DuLNode;  
+     s->data=e;
+     s->prior=p->prior; //1 p->prior表示的是前驱结点, 是存的前驱结点的地址 
+     p->prior->next =s; //2 p->prior->next 表示前驱结点的地址，然后再根据这个查找next 就表示后继
+     s->next = p;       //3
+     p->prior=s;        //4
+     return OK; 
+   } //ListInsert_DuL
+  ```
+
+(6)、双向链表的删除 
+删除示意图:
+ ![image](image/image-20200511150055.png)
+ 
+算法实现:
+```
+  //头结点的指针 &L, 插入一个元素后仍然用这个返回，所以前面带了连字符& 引用型变量
+  void ListDelete_DuL(DuLink &L,int i, ElemType &e){
+     //删除带头结点的双向循环链表L的第i个元素,并用e返回。
+    if(!(p=GetElemP_Dul(L,i))) return RRROR;
+     e = p->data;
+     p->prior->next = p->next; 
+     p->next->prior = p->prior;      
+     free(p)
+     return OK; 
+   } //ListDelete_DuL
+  ```  
+![image](image/image-20200511150727.png)
+
+
+
+(7)、单链表、循环链表和双向链表的时间效率比较 
+![image](image/image-20200511151659.png)
+
+4.6 顺序表和链式的比较
+ (1)、链式存储结构的优点
+    * 结点空间可以动态申请和释放
+    * 数据元素的逻辑次序靠结点的指针来指示,插入和删除时不需要移动数据元素
+ (2)、链式存储结构的缺点
+    * 存储密度小,每个结点的指针域需要额外占用存储空间。当每个结点的数据域所占字节不多时，
+       指针域所占存储空间的比重显得很大
+      存储密度计算方法如图:  
+    ![image](image/image-20200511152937.png) 
+    * 链式存储结构是非随机存取结构。对任一结点的操作都要从头指针依指针链查找到该结点，
+      这增加了算法的复杂度。
+ (3)、比较图
+  ![image](image/image-20200511153341.png) 
+  
+4.7 线性表的应用
+ (1)、问题描述
+    * 假设利用两个线性表La和Lb分别表示两个集合A和B,现要求一个新的集合A=A 并集 B(
+      La=(7,5,3,11) Lb=(2,6,3) ====> La=(7,5,3,11,2,6)
+ (2)、有序表的合并
+    问题描述:
+       已知线性表La和Lb中的数据元素按值非递减有序排列,现要求将La和Lb归并为一个新的线性表Lc,
+       且Lc中的数据元素仍按值非递减有序排列。
+       La=(1,7,8) Lb=(2,4,6,8,10,11) ====> Lc=(1,2,4,6,7,8,8,10,11)        
+ ![image](image/image-20200511155148.png)        
+ 
+ (3)、第一个问题实现
+   a.简单实现步骤: 依次取出Lb集合中的每一个元素, 执行以下操作
+      * 在La中查该元素是否存在
+      * 如果没有找到,那么就将其插入到La的最后
+```
+  //头结点的指针 &L, 插入一个元素后仍然用这个返回，所以前面带了连字符& 引用型变量
+  void unio(List &La,list &Lb){
+    La_len = ListLength(La);
+    Lb_len = ListLength(Lb);
+    for(i=1;i<=Lb_len;i++){
+      GetElem(Lb,i,e);
+        if(!LocateElem(La,e))  
+         ListInsert(&La,++La_len,e);
+     }
+   } //ListDelete_DuL
+  ```  
+图示:
+![image](image/image-20200511173927.png)
+
+
+
+
+
+
+
