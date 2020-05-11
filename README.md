@@ -865,7 +865,7 @@ typedef struct DuLNode
        La=(1,7,8) Lb=(2,4,6,8,10,11) ====> Lc=(1,2,4,6,7,8,8,10,11)        
  ![image](image/image-20200511155148.png)        
  
- (3)、第一个问题实现
+ (3)、第一个问题 两个线性表集合求并集 实现
    a.简单实现步骤: 依次取出Lb集合中的每一个元素, 执行以下操作
       * 在La中查该元素是否存在
       * 如果没有找到,那么就将其插入到La的最后
@@ -884,9 +884,113 @@ typedef struct DuLNode
 图示:
 ![image](image/image-20200511173927.png)
 
+(4)、第二个问题 有序表的合并 实现：
+  算法步骤：
+    a.创建一个空表Lc
+    b.依次从La或Lb中"摘取"元素值较小的结点插入到Lc表的最后，直至其中一个表边空位为止
+    c.继续将La或Lb其中一个表的剩余结点插入在Lc表的最后
+
+1.用顺序表实现 (也就是数组)    
+ ```
+   void MergeList_Sq(SqList LA, SqList LB, SqList &LC){
+     pa = LA.elem;
+     pb = LB.elem;      //指针pa和pb的初值分别指向两个表的第一个元素
+     LC.length = LA.length+LB.length;     //新表长度待合并两表的长度之和
+     LC.elem = new ElemType[LC.length];   //为合并后新表分配一个数组空间
+     pc = LC.elem;                         //指针pc指向新表的第一个元素
+     //怎么知道没有元素了呢?那么就是在最后一个元素加进去就没有了。
+     // 那pa_last怎么得到呢? 那么就是基地址+ 长度减一 就是最后一个元素的地址
+     pa_last = LA.elem + LA.length-1;      // 指针pa_last指向LB表的最后一个元素
+     pb_last = LB.elem + LB.length-1;      // 指针pb_last指向LB表的最后一个元素
+     
+     while(pa<pa_last && pb<pb_last){  //两个表都非空
+        if(*pa <= *pb) {
+          *pc++=*pa++;                //依次"摘取" 两表中值较小的结点
+        }else{
+          *pc++=*pb++; 
+        }
+     }
+
+     while(pa<=pa_last){
+       *pc++=*pa++;  //LB表已达到表尾，将LA中剩余元素加入到LC中
+     }
+     while(pb<=pb_last){
+            *pc++=*pb++;  //LA表已达到表尾，将LB中剩余元素加入到LC中
+     }
+
+    } //MergeList_Sq
+   ```
+算法图示:
+![image](image/image-20200511223535.png)
+![image](image/image-20200511223609.png)
 
 
+2.用链表表实现合并
+![image](image/image-20200511224045.png)
+ 移动指针pa,  这里pa指针来操作La中结点，pb指针来操作Lb中的结点，pc指针来操作Lc中的结点
+![image](image/image-20200511224641.png)
+当Lb中元素小于La中的 data域，那么将小的那个加入到lc当做去
+![image](image/iamge-20200511224945.png)
+也是重复操作，判断是否那个小，然后将小的加入到Lc中，
+![image](image/iamge-20200511225214.png)
+如果当pa指针 为空时，这就表示一个链表已经全部加入到 一个新的链表中去了，那么没有元素就不管了，只是将还有元素的链表加入到新的链表中去
+![image](image/iamge-20200511225537.png)
+合并之后
+![image](image/iamge-20200511225707.png)
 
+链表算法实现：
+```
+   void MergeList_Sq(LinkList &La, LinkList &Lb, LinkList &Lc){
+     pa = La->next;
+     pb = Lb->next;      
+     pc=Lc=La;     //用La的头结点作为Lc的头结点
 
+     while(pa && pb){  
+        if(pa ->data<=pb->data) {
+          pc->next=pa;
+          pc=pa;
+          pa=pa->next;
+        }else{
+          pc->next=pb;
+          pc=pb;
+          pb=pb->next; 
+        }
+     }
+     pc->next=pa?pa:pb; //插入剩余段
+     delete Lb; //释放Lb的头结点    
+    } //MergeList_Sq
+   ```
+![image](image/iamge-20200511230502.png)
 
+4.8 案例分析和实现
+(1)一元多项式计算
+使用数组来表示：
+多项式的指数表示数组的下标， 然后存储值用系数表示
+![image](image/iamge-20200511230816.png)
 
+使用数组存储，因为都是相同指数来表示，所以多项式相加就是将数组相同下标进行相加
+![image](image/iamge-20200511231444.png)
+
+(2) 稀疏多项式的运算
+多项式非零项的数组表示
+      比如 (a).A(x) = 7+3X+9X^8 + 5X^17
+表示方式：
+       下标i:  0, 1, 2, 3
+      系数a[i]:7, 3, 9, 5
+      指数：   0, 1, 8, 17
+      
+使用线性表来表示:
+  线性表A=((7,0),(3,1),(9,8),(5,17))
+图示：
+![image](image/image-20200511232121.png)
+
+示例：   
+ 线性表A=((7,0),(3,1),(9,8),(5,17))
+ 线性表B=((8,1),(22,7),(-9,8))
+*创建一个新数组c
+*分别从头遍历比较a和b的每一项
+   a.如果指数相同,对应系数相加,若其和不为零,则在c中增加一个新项
+   b.如果指数不相同,则将指数较小的复制到c中  
+*一个多项式已遍历完毕时,将另一个剩余项依次复制到c中即可
+   数组大小不好确定
+![image](image/image-20200511232956.png)        
