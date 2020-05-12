@@ -1287,7 +1287,6 @@ Tips: 栈: 后进先出
  * 继续处理当前字符,直到遇到结束符为止。       
 ```  
  
-     
   ![image](image/image-20200512173621.png) 
   
 
@@ -1297,5 +1296,197 @@ Tips: 栈: 后进先出
   
   
   
+5.3 栈的表示和操作的实现
+ 1、栈的抽象数据类型的类型定义
+ ```
+  ADT Stack{
+   数据对象：
+       D={ai|ai∈ElemSet, i=1,2,...,n,n>=0 }
+   数据关系：
+       R1={<ai-1,ai> | ai-1, ai∈D,i=2,...,n}
+       约定an端为栈顶,a1端为底。
+   基本操作：初始化、进栈、出栈、取栈顶元素等
+ } ADT Stack
+ ```
+ ![image](image/iamge-20200512214609.png) 
+ 
+2、相关操作
+```
+  InitStack(&S) 初始化操作
+  操作结果:构造一个空栈S。
   
+  DestroyStack(&s) 销毁栈操作
+  初始条件：栈S已存在。
+  操作结果：栈S被销毁。
+
+  StackEmpty(S) 判定s是否为空栈
+  初始条件：栈S已存在。
+  操作结果：若栈S为空栈,则返回TRUE, 否则FALSE。
+ 
+  StackLength(S) 求栈的长度
+  初始条件：栈S已存在。
+  操作结果：返回S的元素个数,即栈的长度。
+
+  GetTop(S, &e) 取栈顶元素
+  初始条件：栈S已存在且非空。
+  操作结果：用e返回S的栈顶元素。
+
+  ClearStack(&S) 栈置空操作
+  初始条件：栈S已存在。
+  操作结果：将S清为空栈。
+
+  Push(&S,e)  入栈操作
+  初始条件：栈S已存在。
+  操作结果：插入元素e为新的栈顶元素。
+ 
+  Pop(&S, &e)  出栈操作
+  初始条件：栈S已存在且非空。
+  操作结果：删除S的栈顶元素an,并用e返回其值。
+
+ ``` 
+![image](image/iamge-20200512215633.png) 
+ 
+
+3、栈的存储
+  由于栈本身就是线性表,于是栈也有顺序存储和链式存储两种实现方式
+  * 栈的顺序存储---顺序栈
+  * 栈的链式存在---链栈  
   
+4、存储方式：
+```
+ 同一般线性表的顺序存储结构完全相同，利用一组地址连续的存储单元依次存放自栈低
+   到栈顶的数据元素。栈底一般在低地址端。
+    a、附设top指针，指示栈顶元素在顺序栈中的位置。(注意top指针不是指的栈顶元素，而是栈顶元素之上的下标地址)
+    b、另设base指针，指示栈底元素在顺序栈中位置
+     但是，为了方便操作，通常top指示真正的栈顶元素之上的下标地址
+    c、另外，用stacksize表示栈可使用的最大容量 
+```
+![image](image/image-20200512221543.png) 
+  
+声明一个栈,然后进行入栈和出栈操作   
+空栈：base==top 是栈空标志
+栈满了就是： top-base == stacksize
+![image](image/image-20200512222246.png)  
+
+  
+ (1)使用数组作为顺序栈存储方式的特点: 简单、方便、但易产生溢出(数组大小固定)
+  * 上溢(overflow): 栈已满,又要压入元素
+  * 下溢(underflow): 栈已经空，还要弹出元素   
+  注意：上溢是一种错误，使问题的处理无法进行; 而下溢一般任务是一种结束条件，即问题处理结束。
+  
+顺序栈的表示
+```
+# define MAXSIZE 100
+//定义一个结构类型
+ typedef struct{
+    SElemType *base; //栈底指针
+    SElemType *top; //栈顶指针
+    int stacksize; //栈可以最大容量  
+}SqStack;
+```  
+指针相减得到的是栈中元素个数= top -base
+![image](image/iamge-20200512223554.png)
+
+
+5、顺序栈的初始化
+```
+Status InitStack(SqStack &S){ //构造一个空栈，这个S就是 SqStck类型，这个类型上面已经定义了
+   S.base = new SElemType[MAXSIZE]; // SElemType 数组类型， 数组名字是S， 这个是C语言语法
+     // 或使用C++语法  S.basee = (SElemType)malloc(MAXSIZE*sizeof(SElemType))
+   if(!S.base) exit(OVERFLOW);//存储分配失败
+   S.top = S.base; //栈顶指针等于栈底指针
+   S.stacksize = MAXSIZE;
+   return OK;   
+}
+```
+
+6、顺序栈判断栈是否为空
+```
+Status StackEmpty(SqStack S){
+   //若栈为空,返回TRUR; 否则返回FALSE 
+   if(S.top == S.base) 
+    return TRUE;   
+   else 
+    return FALSE;
+}
+```
+7、求顺序栈长度
+```
+int StackLength(SqStack S){
+   return S.top - S.base;
+}
+```
+  
+8、清空顺序栈
+```
+Status  ClearStackLength(SqStack S){
+ if(S.base){S.top == S.base;} 
+   return OK;
+}
+```
+9、销毁顺序栈
+```
+Status  DestroyStack(SqStack S){
+ if(S.base){
+    delete S.base; // 只是释放空间，不销毁指针
+    S.stacksize = 0;
+    S.base = S.top =NULL:
+ } 
+   return OK;
+}
+```    
+
+10、顺序栈入栈
+```
+(1)判断是否栈满，若满则出错(上溢)
+(2)元素e 压入栈顶
+(3) 栈顶指针加1
+
+Status  Push(SqStack &S,SElemType e){
+ if(S.top -S.base == S.stacksize){ //栈满
+   return ERROR;
+ } 
+   
+    *S.top = e; //将top指针所指的这一块空间用*运算符，来取值
+     S.top ++;
+    // *S.Stop++=e; //这一步是上面的两步合起来的
+    
+   return OK;
+}
+```
+![image](image/image-20200512231353.png)  
+
+11、顺序栈出栈
+```
+(1)判断是否空栈，若空则出错(下溢)
+(2)获取栈顶元素 e
+(3) 栈顶指针减1
+
+Status  Pop(SqStack &S,SElemType &e){
+  //若栈不为空，则删除S的栈顶元素，用e返回其值，返回返回Ok; 否则返回ERROR
+ if(S.top == S.base  ){ //等价于 if(StackEmpty(S))
+    //空栈
+   return ERROR;
+ } 
+    --S.top;
+    e=*S.top;
+     //e= --*S.top ;  这一步是上面两步结合
+    
+   return OK;
+}
+```
+![image](image/image-20200512231257.png)
+
+
+5.3.2 栈的表示和操作的实现2
+ 链栈的表示
+ * 链栈是运算受限的单链表，只能在链表头部进行操作
+```
+//定义一个结构类型
+ typedef struct SatckNode{ //栈的结点
+    SElemType data;  //数据域，用来存储栈中元素的
+    struct SatckNode * next; 
+   
+}SatckNode, *LinkStack;
+LinkStack S;
+```
