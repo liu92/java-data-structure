@@ -3183,6 +3183,385 @@ Status PreOderTraverse(BiTree T){
  (3)、递归遍历过程
  ![image](image/image-20200515172613.png)
   
-
- 
   
+ (4)、中序遍历
+ ![image](image/image-20200515224112.png)
+ 
+ (5)、中序遍历算法
+``` 
+ Status InOderTraverse(BiTree T){
+  if(T==NULL){ return OK; //空二叉树}
+  else{
+    InOderTraverse(T->lchild); //递归遍历左子树;
+    visit(T); //访问根结点
+    InOderTraverse(T->rchild); //递归遍历右子树;
+  }
+ }
+ ```   
+
+
+ (6)、后序遍历
+![image](image/image-20200515224320.png) 
+ (7)、后序遍历算法
+ ``` 
+  Status PostOderTraverse(BiTree T){
+   if(T==NULL){ return OK; //空二叉树}
+   else{
+     PostOderTraverse(T->lchild); //递归遍历左子树;
+     PostOderTraverse(T->rchild); //递归遍历右子树;
+     visit(T); //访问根结点
+   }
+  }
+  ```   
+
+   
+ (8)、遍历算法的分析
+ ```
+   先序遍历、中序遍历、后序遍历 这三中遍历算法 其实都是相同的,只是执行的时机不同。
+   如果不看根结点的打印,那么就一样的。
+   
+   
+```
+ ![image](image/image-20200515224507.png) 
+ 
+```
+   如果去掉输出语句,从递归的角度看,三种算法是完全相同的，或者说这三种算法
+   访问的路径是相同的,只是访问的时机不同。
+   时机效率: O(n) //每个结点只访问一次
+   空间效率: O(n) // 栈占用的最大辅助空间
+``` 
+ ![image](image/image-20200515224837.png) 
+  
+  
+7.5.7 、遍历二叉树的非递归算法
+  (1)、中序遍历非递归算法
+``` 
+  二叉树中序遍历的非递归算法的关键:在中序遍历过某结点的整个左子树后,
+   如何找到该结点的根以及右子树。
+  基本思想:
+    a.建立一个栈。
+    b.根结点进栈,遍历左子树
+    c.根结点出栈,输出根结点,遍历右子树。 
+```  
+(2)、算法实现
+``` 
+  Status InOderTraverse(BiTree T){
+   BiTree p; InitStack(S); p=T;
+    // 当p为空, 或者栈不为空
+   while(p || !StackEmpty(S)){
+    if(p){ Push(S,p); p=p->lchild;}
+    else{ Pop(S,q); printf("%c", q->data);
+         p = q->rchild;
+    }
+  }// while
+  return OK;
+}
+  ``` 
+![image](image/image-20200516151801.png) 
+    
+
+ (3)、二叉树的层次遍历
+ ```
+   对于一颗二叉树,从根结点开始,按照从上到下,从左到右的顺序访问每一个结点。 
+   每一个结点仅仅访问一次。
+```
+ (4)、层次遍历的算法思路
+  ```
+    a.将根结点进队;
+    b.对不为空时循环，从队列中出列一个结点*p,访问它;
+        (1) 若它有左孩子结点,将左孩子结点进队;
+        (2) 若它有右孩子结点,将右孩子结点进队。
+
+    总结: 就是从根结点开始 入队, 然后队列不为空那么就输出队列中对队头元素。
+        如果它有左右孩子,那么就将这左右孩子结点入队，同样再循环判断是否为空。
+        若不为空则将队头元素出队, 并且查找这个结点是否有左右孩子依次去处理.......
+ ```
+  (5)、层次遍历的算法使用队列类型定义如下
+``` 
+   typedef struct{ 
+    BTNode data[MaxSize]; //存放队列中元素
+    int front, rear;  //队头和队尾指针
+}SqQueue;  //顺序循环队列类型   
+ ```
+
+  (6)、层次遍历的算法实现
+``` 
+  Status LevelOder(BTNode *b){
+   BTNode *p; SqQueue *qu;
+   InitQueue(qu); //初始化队列
+   enQueue(qu, b); //根结点指针进入队列
+   while(!QueueEmpty(qu)){ //队列不为空,则循环
+    deQueue(qu, p); //出队结点p
+    print("%c", p->data); //访问结点p
+    if(p->lchild!=NULL) enQueue(qu, p->lchild); //有左孩子时将其进队
+    
+    if(p->rchild!=NULL) enQueue(qu, p->rchild); //有右孩子时将其进队
+  }
+}
+  ``` 
+![image](image/image-20200516154139.png) 
+  
+  
+7.5.8 、二叉树遍历算法的应用---二叉树的建立
+  (1)、按先序遍历序列建立二叉树的二叉链表
+```
+  例如: 已知先序序列为: ABCDEGF
+  a、从键盘输入二叉树的结点信息,建立二叉树的存储结构;
+  b、在建立二叉树的过程中按照二叉树先序方式建立 
+```  
+ ![image](image/image-20200516161209.png)
+ 
+ (2)、复制二叉树
+```
+  如果是空树,递归结束;
+  否则,申请新结点空间,复制根结点
+    *递归复制左子树
+    *递归复制右子树
+``` 
+  (3)、算法实现
+``` 
+  int Copy(BiTree T, BiTree &NewT){
+    if(T==NULL){//如果是空树返回0
+     NewT=NULL; return 0;
+    }else{
+      //NewT-> 指针生成,就是在生成这个新结点的地址 就复制给了NewT了
+      NewT=new BiNode; NewT->data=T->data;
+      Copy(T->lChild, NewT->lchild);
+      Copy(T->rChild, NewT->rchild);
+   }
+}
+  ``` 
+ ![image](image/image-20200516163525.png)
+   
+ (4)、计算二叉树深度  
+ ```
+   如果是空树,则深度为0;
+   否则,递归计算左子树的深度记为m,递归计算右子树的深度记为n, 二叉树的深度则为m与n的较大者加1。
+ ```
+  * 算法实现
+``` 
+int Depth(BiTree T){
+ if(T==NULL) return 0; //如果是空树返回0
+ else{
+   m = Depth(T->lChild);
+   n = Depth(T->rChild);
+   if(m>n) return (m+1);
+   else return (n+1);
+ }
+}
+```  
+![image](image/image-20200516164615.png)
+
+  (5)、计算二叉树结点总数   
+```
+   如果是空树,则结点个数为0;
+   否则,结点个数为左子树的结点个数+右子树的结点个数再+1。  
+    再加一表示 加上根结点
+ ```   
+  * 算法实现
+``` 
+int NodeCode(BiTree T){
+ if(T==NULL) return 0; //如果是空树返回0
+ else{
+   return NodeCode(T->lChild)+ NodeCode(T->rChild) + 1;
+ }
+}
+```  
+![image](image/image-20200516165243.png) 
+  
+  
+  (6)、计算二叉树叶子结点数
+```
+   如果是空树,则叶子结点个数为0;
+   否则,为左子树的叶子结点个数 + 右子树的叶子结点个数。  
+ ```
+  * 算法实现   
+``` 
+int leadCode(BiTree T){
+ // 判断树是否为空
+ if(T==NULL) return 0; //如果是空树返回0
+   //如果不为空, 则判断结点的 左右子树, 如果都为空 那么就说明 既没有左子树,也没有右子树
+   // 那么就是叶子结点 , 就返回一个结点。
+   // 如果 有一个不为空 ,那么说明不是叶子结点。所以进入下面else判断
+  if(T->lChild == NULL && T->rChild==NULL){
+   return 1; //如果是叶子结点返回1,  什么是叶子结点呢？就是左子树和右子树都为空 才是叶子结点
+  }else{
+      return leadCode(T->lChild)+ leadCode(T->rChild);
+   }
+ 
+}
+```     
+![image](image/image-20200516172625.png) 
+
+
+7.5.9 、线索二叉树
+ * 问题:为什么要研究线索二叉树？
+``` 
+ 当用二叉链表作为二叉树的存储结构时,可以很方便地找到某个结点的左右孩子;
+但一般情况下,无法直接找到该结点在某种遍历序列中的前驱和后继结点。
+```    
+(1) 提出的问题: 如何寻找特定遍历序列中二叉树结点的前驱和后继??
+``` 
+  解决的方法:
+   1、通过遍历寻找-----浪费时间
+   2、再增设前驱、后继指针域----增加了存储负担。
+   3、利用二叉链表中的空指针域。
+```  
+ * 回顾: 二叉树链表中空指针域的数量:
+``` 
+  具有n个结点的二叉链表中,一共有2n个指针域; 因为n个结点中有n-1个孩子,即2n个指针域中,
+ 有n-1个用来指示结点的左右孩子,其余n+1个指针域为空。
+```
+![image](image/image-20200516183122.png) 
+ 
+ (2)、利用二叉链表中的空指针域:
+ ``` 
+   如果某个结点的左孩子为空,则将空的左孩子指针域改为 "指向其前驱";
+ 如果某个结点的右孩子为空,则将空的右孩子指针域改为 "指向其后继"
+  --------这种改变指向的指针称为"线索"
+   加上了线索的二叉树称为 线索二叉树(Threaded Binary Tree)
+  对二叉树按某种遍历次序使其变为线索二叉树的过程叫 线索化
+ ```
+ 
+ (3) 增设标志域
+  ``` 
+   为区分lrchild 和 rchild指针到底是指向孩子的指针,孩子指向前驱或者后继的指针,
+  对二叉链表中每个结点增设两个标志域 ltag和rtag, 并约定：
+   ltag = 0 ; lchild指向该结点的左孩子
+   ltag = 1 ; lchild指向该结点的前驱
+   rtag = 0 ; rchild指向该结点的右孩子
+   rtag = 1 ; rchild指向该结点的后继 
+  ```
+ 这样,结点的结构
+``` 
+   typedef struct BiThrNode{
+    int data; 
+    int ltag, rtag; 
+    struct BiThrNode *lchild, rchild;
+}BiThrNode, *BiThrTree;
+ ```
+![image](image/image-20200516224520.png) 
+
+  * 练习
+```
+  为了避免悬空状态,增设一个头结点
+  ltag=0, lchild 指向根结点，
+  rtag=1, rchild 指向遍历序列中最后一个结点，遍历序列中第一个结点的lc域和最后一个结点的rc域都指向头结点
+```   
+ ![image](image/image-20200516224602.png)  
+ ![image](image/iamge-20200516224841.png)  
+ 
+ 
+ 
+7.6 、树和森林
+  (1)、树和森林
+```
+ 树是n(n>=0)个结点的有限集。若n=0,称为空树;
+    若n>0  (1) 有且仅有一个特定的称为根(Root)的结点;
+           (2) 其余结点可分为 m(m>=0)个互不相交的有限集T1,T2,T3,....,Tm
+
+ 森林: 是m(m>=0)颗互不相交的树的集合。
+``` 
+ ![image](image/image-20200517075955.png)  
+ 
+  (2)、双亲表示法
+ ```
+  实现:定义结构数组, 存放树的结点,每个结点含有两个域:
+      * 数据域:存放结点本身信息。
+      * 双亲域: 指示本结点的双亲结点在数组中的位置。
+   
+  查找方式就是通过数组下标和 双亲域来判断,如果下标等于双亲域 则表示结点的双亲域是对应的下标值
+  数组下标、以及数据域、和双亲域
+  r=0表示根结点 存储在数组下标为0的位置
+  n=10 表示结点个数
+  
+  该方法的特点:找双亲容易,找孩子难
+```
+ ![image](image/image-20200517080500.png)  
+ 
+  * C 语言的类型描述:
+``` 
+   typedef struct PThrNode{
+    TElemType data; 
+    int parent; //双亲位置域
+}PThrNode;
+ ```  
+  * 树结构
+``` 
+#define MAX_TREE_SIZE 100
+   typedef struct {
+    PThrNode nodes[MAX_TREE_SIZE]; 
+    int r,n; //根结点的位置和结点个数
+}PTree;
+ ```    
+ ![image](image/image-20200517081207.png) 
+  
+  
+7.6.1 、树的存储结构---孩子链表
+```
+把每个结点的孩子结点排列起来,看成是一个线性表,用单链表存则n个结点有n个孩子链表(叶子的孩子链表为空表)。
+ 而n个头指针又组成一个线性表,用顺序表(含n个元素的结构数组)存储。
+ 
+ 指针域指向它的第一个孩子 firstchild
+```  
+ ![image](image/image-20200517082947.png) 
+
+  * C 语言的类型描述:
+ ``` 
+    //孩子结点
+    typedef struct CTNode{
+     int child; 
+     struct CTNode *next; 
+ }*ChildPtr;
+  ```  
+   * 双亲结点结构
+ ``` 
+    typedef struct {
+     TElemType data; 
+     ChildPtr firstchild; //孩子链表头指针
+ }CTBox;
+  ```    
+  
+  * 树结构
+   ``` 
+      typedef struct {
+       CTBox nodes[MAX_TREE_SIZE]; 
+       int n,r; //结点数和根结点的位置, 为了存储方便 存储两个整数 
+         //一个是结点的个数,一个是根结点的下标
+   }CTree;
+ ```   
+![image](image/image-20200517084128.png) 
+
+
+``` 
+ 在结构数组中再添加了一个成员,这个成员就是表示双亲结点的下标,这样查找方便些, 但是这种做法也是牺牲了空间
+```
+ ![image](image/image-20200517084714.png) 
+  
+  
+7.6.2、树的存储结构---孩子兄弟表示法(二叉树表示法,二叉链表表示法)
+  * 实现
+ ```
+   用二叉链表作树的存储结构,链表中每个结点的两个指针域分别指向其中第一个孩子结点
+     和下一个兄弟结点
+```
+   * C 语言的类型描述
+ ``` 
+   typedef struct CSNode {
+    ElemType data; 
+    struct CSNode *firstchild, *nextsibling;   
+   }CSNode,*CSTree;
+ ```  
+ ![image](image/image-20200517085400.png) 
+
+  * 孩子兄弟表示法
+```
+ 如果 第一个孩子结点没有 那么就用空表示， 
+ 若结点的兄弟结点没有 也用空表示。
+```  
+  ![image](image/image-20200517085645.png) 
+  
+  
+7.6.3、树和森林---树与二叉树的转换
+ (1)、树与二叉树的转换
+ 
