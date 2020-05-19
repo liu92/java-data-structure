@@ -4122,7 +4122,7 @@ int leadCode(BiTree T){
   
   
  (5)、邻接矩阵
-  邻接矩阵的存储表示:用两个数组分别存储顶点表和邻接矩阵
+   邻接矩阵的存储表示:用两个数组分别存储顶点表和邻接矩阵
 ``` 
   #define MaxInt 32767   //表示极大值,即∞
   #define MVNum 100   //最大顶点数
@@ -4138,7 +4138,7 @@ int leadCode(BiTree T){
  ![image](image/image-20200519105257.png)  
   
   
-  (2)、采用邻接矩阵表示法创建无向图
+  (6)、采用邻接矩阵表示法创建无向图
    
    * 算法思想
 ``` 
@@ -4149,7 +4149,7 @@ int leadCode(BiTree T){
  ![image](image/image-20200519105624.png)  
 
   
-  (3)、算法--采用邻接矩阵表示法创建无向图
+  (7)、算法--采用邻接矩阵表示法创建无向图
 ``` 
  Status CreateUDN(AMGraph &G){
     //采用邻接矩阵表示法,创建无向网G
@@ -4159,13 +4159,61 @@ int leadCode(BiTree T){
    for(i=0;i<G.vexnum;++i){ //初始化邻接矩阵, 给邻接矩中所有的元素都赋值一无穷大
      for(j=0; j<G.vexnum; ++j){
         G.arcs[i] = MaxInt;
+        for(k=0;k<G.arcnum;++l){ // 构造邻接矩阵
+        cin>>v1>>v2>>w;   // 输入一条边所依附的顶点及边的权值
+        i = LocateVex(G, v1);   // 得到当前输入的顶点,在顶点表的位置
+        j = LocateVex(G, v2);   //确定v1和v2在G中的位置
+        G.arcs[i][j] = w;     // 边<v1,v2>的权值置为w
+        G.arcs[j][i] = G.arcsp[i][j]  // 置<v1,v2>的对称边<v2,v1>的权值为w
+     }
+      return OK;
    }
   }
  }
 }
+
+
+int LocateVex(AMGraph G, VertexType u){
+  // 图G中查找顶点u,存在则返回顶点表中的下标; 否则返回-1
+  int i;
+   for(i=0; i<G.vexnum; ++i)
+    if(u==G.vexs[i]) return i;
+   return -1;
+} 
 ```  
+ ![image](image/image-20200519223426.png)  
   
   
   
+(5.2)、邻接矩阵
+  * 采用邻接矩阵表示法创建无向网
+  ![image](image/image-20200519224103.png) 
+  
+  * 邻接矩阵----有什么好处？
+  ![image](image/image-20200519224741.png) 
   
   
+  * 邻接矩阵----有什么不好？
+  ![image](image/image-20200519225242.png) 
+
+8.3.2、邻接表
+ (1)、邻接表表示法(链式)
+``` 
+ 顶点:按编号顺序将顶点数据存储在一维数组中;
+ 关联同一顶点的边(以顶点为尾的弧): 用线性链表存储
+   
+  adjvex: 邻接点域,存放与Vi邻接的顶点在表头数组中的位置
+  nextarc: 链域,指示下一条边或弧
+```
+ ![image](image/image-20200519225954.png) 
+ 
+ 
+ (2)、无向图 
+``` 
+特点: a、邻接表不唯一
+      b、若无向图中有n个顶点、e条边, 则其邻接表需n个头结点和2e个表结点。适宜存储稀疏图
+      c、无向图中顶点Vi的度为第i个单链表中的结点数。 
+```
+ ![image](image/image-20200519231134.png) 
+ 
+ (3)、有向图
