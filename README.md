@@ -4217,3 +4217,118 @@ int LocateVex(AMGraph G, VertexType u){
  ![image](image/image-20200519231134.png) 
  
  (3)、有向图
+ ![image](image/image-20200520214229.png) 
+ 
+ (4)、当邻接表的存储结构形成后,图便唯一确定。
+ ![image](image/image-20200520214557.png) 
+ 
+8.3.3、邻接表----图的邻接表存储表示
+ (1)、顶点的结点结构
+ ``` 
+typedef struct VNode{
+   VerTexType data;   //订单信息
+   ArcNode *firstarc;   //指向第一条依附该顶点的边的指针
+}VNode,AdjList[MVNum]; // AdjLis表示邻接表类型
+
+说明: 例如 AdjList v;    相当于: VNode v[MVNum];
+```
+![image](image/image-20200520215838.png) 
+
+ (2)、弧(边)的结点结构
+  ``` 
+# define MVNum 100  //最大顶点数
+ typedef struct ArcNode{   //边结点
+    int adjvex;        // 该边所指向的顶点的位置
+    struct ArcNode * nextarc;   //指向下一条边的指针
+    OtherInfo info;   //指向第一条依附该顶点的边的指针
+ }ArcNode; // 和边相关的信息
+ 
+ ```
+![image](image/image-20200520215751.png) 
+  
+  (3)、图的结构定义
+ ```
+typedef struct {
+   AdjList vertices;   //vertices---vertex的复数
+   int vexnum, arcnum;  // 图的当前顶点数和弧数
+}ALGraph; 
+
+``` 
+ (4)、邻接表举例说明
+ [image](image/image-20200520220459.png) 
+
+ (5)、采用邻接表表示法创建无向网
+  * 算法思想
+``` 
+ 1、输入总顶点数和总边数
+ 2、建立顶点表
+      依次输入点的信息存入顶点表中 使每个表头结点的指针域初始化为NULL
+ 3、创建邻接表
+      依次输入每条边依附的两个顶点
+      确定两个顶点的序号i和j,建立边结点
+      将此边结点分别插入到Vi和Vj对应的两个边链表的头部
+```  
+ (6)、算法---采用邻接表表示法创建无向网
+ ```
+  Status CreateUDG(ALGraph &G){ //采用邻接表表示法,创建无向图G
+    cin>>G.vexnum>>G.arcnum;   //输入总顶点数,总边数
+    for(i=0;i<G.vexnum;++i){   // 输入各点, 构造表头结点表
+       cin>>G.vertices[i].data;  // 输入顶点值
+       G.vertices[i].firstrc=NULL;  // 初始化表头结点的指针域
+    }
+    for(k=0;k<G.vexnum;++k){     // 输入各边,构造邻接表
+           cin>>v1>>v2;          // 输入一条边依附的两个顶点
+           i = LocateVes(G, v1);  
+           j = LocateVes(G, v2);
+           //在有向图中 下面的4句代码就是 建立了出度边
+           p1 = new ArcNode;     //生成一个新的边结点*p1
+           p1->adjvex = j;       //邻接点序号为j
+           p1->nextarc = G.vertices[i].fristarc;
+           G.vertices[i].firstrc = p1;   //将新结点*p1插入到顶点vi的边表头部
+           
+            //在有向图中 下面的4句代码就是 建立了入度边
+           // 如果不要上面的4句代码,只要下面的4句代码 就是建立有向网的逆邻接矩阵
+           p2 = new ArcNode;             // 生成另一个对称的新的边结点*p2
+           p2->adjvex = i;              //邻接点序号为i
+           p2->nextarc = G.vertices[j].fristarc;
+           G.vertices[j].firstrc = p2;   //将新结点*p2插入到顶点vj的边表头部 
+                      
+    }  
+    return OK;
+}
+
+```
+[image](image/image-20200520222713.png) 
+[image](image/image-20200520223446.png) 
+
+
+ (7)、邻接表特点
+``` 
+ 1、方便找任一顶点的所有"邻接点"
+ 2、节约稀疏图的空间
+     需要N个头指针 + 2E个结点(每个结点至少2个域)
+ 3、方便计算任一顶点的 "度" ?
+    对无向图: 是方便计算的
+    对有向图: 只能计算 "出度"; 需要构造 "逆邻接表" (存指向自己的边) 来方便计算 "入度"
+ 4、不方便检查任意一对顶点间是否存在边
+```   
+[image](image/image-20200520225706.png)  
+
+ (8)、邻接矩阵与邻接表表示的关系
+  * 联系:邻接表中每个链表对应于邻接矩阵中一行,链表中结点个数等于一行中非零元素的个数。
+ [image](image/image-20200520225903.png)
+  
+  * 区别
+``` 
+   1、对于任一确定的无向图,邻接矩阵的唯一的(行列号与顶点编号一致),但邻接表不唯一
+     (链接次序与顶点编号无关)。
+   2、邻接矩阵的空间复杂度为O(n^2),而邻接表的空间复杂度为O(n+e)。
+```   
+  * 用途:邻接矩阵多用于稠密图;而邻接表多用于稀疏图。
+  [image](image/image-20200520230710.png) 
+  
+  
+8.3.4、邻接表----图的其他存储结构 
+ (1)、十字链表----用于有向图
+ [image](image/image-20200520231022.png) 
+ 
