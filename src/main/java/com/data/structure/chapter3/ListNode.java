@@ -9,43 +9,29 @@ package com.data.structure.chapter3;
  * History:
  * @<version> 1.0
  */
-public class ListNode<T> {
+public class ListNode {
 
     /**
      * 元素类型
      */
-   private  T data;
+   public int data;
     /**
      * 指向下一个结点
      */
-    private ListNode next;
+    public ListNode next;
 
 
-     ListNode() {
-    }
+   ListNode() {
+   }
 
-    public  ListNode(T data){
+   public  ListNode(Integer data){
         this.data = data;
     }
 
-    ListNode(T data,ListNode next){
+   ListNode(Integer data,ListNode next){
         this.data = data;
         this.next = next;
-    }
+   }
 
-    public T getData() {
-        return data;
-    }
 
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public ListNode getNext() {
-        return next;
-    }
-
-    public void setNext(ListNode next) {
-        this.next = next;
-    }
 }
